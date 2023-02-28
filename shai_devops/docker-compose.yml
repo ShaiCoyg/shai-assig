@@ -1,0 +1,47 @@
+services:
+  app1:
+    build: pyapp
+    command: sh -c "sleep 25s ; python3 app.py"
+    ports:
+      - "5000"
+    depends_on:
+      - mysql
+  app2:
+    build: pyapp
+    command: sh -c "sleep 25s ; python3 app.py"
+    ports:
+      - "5000"
+    depends_on:
+      - mysql
+  app3:
+    command: sh -c "sleep 25s ; python3 app.py ; script.sh"
+    build: pyapp
+    ports:
+      - "5000"
+    depends_on:
+      - mysql
+  nginx:
+    build: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - app1
+      - app2
+      - app3
+  mysql:
+    build: database
+    restart: always
+    environment:
+      MYSQL_DATABASE: "db"
+      MYSQL_ROOT_PASSWORD: "rootpass"
+    ports:
+      - "3305:3306"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - type: bind
+        source: ./database
+        target: /app/db
